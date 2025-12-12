@@ -1,10 +1,8 @@
+version: 2
 
- version: 2
-
- sources:
-   - name: gz_raw_data
-     tables:
-       - name: raw_gz_sales
-       - name: raw_gz_product
-
-       - name: raw_gz_ship
+sources:  # <-- Doit commencer à la colonne 1
+  - name: gz_raw_data # <-- Indentation de 2 espaces
+    tables:           # <-- Indentation de 4 espaces
+      - name: raw_gz_sales
+      - name: raw_gz_product
+      - name: raw_gz_ship
