@@ -1,8 +1,59 @@
 version: 2
 
-sources:  # <-- Doit commencer à la colonne 1
-  - name: gz_raw_data # <-- Indentation de 2 espaces
-    tables:           # <-- Indentation de 4 espaces
+sources:
+  # Dataset/Schema level description
+  - name: gz_raw_data
+    schema: gz_raw_data
+    description: "Raw ERP dataset containing tables for sales transactions, product details, and shipping costs."
+
+    tables:
+      # TABLE 1: raw_gz_sales
       - name: raw_gz_sales
+        description: "Transaction details for every item sold (one row per product per order)."
+        # Freshness testing
+        loaded_at_field: "CAST(date_date AS TIMESTAMP)"
+        freshness:
+           warn_after: {count: 90, period: day}
+
+        columns:
+          - name: date_date
+            description: "The date the purchase was made."
+          - name: orders_id
+            description: "Unique identifier for the order (FK to the shipping table)."
+          - name: products_id
+            description: "Unique identifier for the product (FK to the products table)."
+          - name: revenue
+            description: "Total sales amount for this specific line item."
+          - name: quantity
+            description: "Number of units of the product sold in this order."
+        tests:
+          - unique:
+              column_name: "(orders_id || '-' || pdt_id)"
+
+      # TABLE 2: raw_gz_product
       - name: raw_gz_product
+        description: "Reference table containing product attributes and costs."
+        columns:
+          - name: products_id
+            description: "Primary key: Unique identifier for each product."
+            tests:
+              - unique
+              - not_null
+          - name: purchase_price
+            description: "The unit cost price paid by the company to acquire the product."
+
+      # TABLE 3: raw_gz_ship
       - name: raw_gz_ship
+        description: "Shipping details and logistical costs associated with each order."
+        columns:
+          - name: orders_id
+            description: "Primary key: Unique identifier for the order."
+            tests:
+              - unique
+              - not_null
+          - name: shipping_fee
+            description: "The shipping price charged to the customer."
+          - name: logcost
+            description: "Internal logistics cost (e.g., warehouse preparation and handling)."
+          - name: ship_cost
+            description: "The actual shipping cost paid by the company to the carrier."
